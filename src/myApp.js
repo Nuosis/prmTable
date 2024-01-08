@@ -1,49 +1,48 @@
 import React, { useState, useEffect, useRef } from "react";
-import MyTable from "../components/Table"
+import Table from "../components/Table"
 
-const MyApp = ({initData,initRecords}) => {
+const MyApp = ({initTags,initHeadlines}) => {
 	console.log('init MyApp')
-	console.log('init ItemData',initData)
-	console.log('init recordData',initRecords)
+	console.log('init Tags',initTags)
+	console.log('init Headlines',initHeadlines)
 
-	const [itemData, setItemData] = useState(initData);
 
     // Function to transform the initial record
 	const transformedRecords = () => {
-		// Check if initRecords is empty or not an array
-		if (!Array.isArray(initRecords) || initRecords.length === 0) return [];
+		let transformedData = {};
+		
+		// Initialize a temporary array to store all headlines
+		let allHeadlines = initHeadlines.map(headline => ({
+			id: headline.fieldData.__ID,
+			date: headline.fieldData.PubDate,
+			creator: headline.fieldData.Creator,
+			title: headline.fieldData.Title
+		}));
 	
-		return initRecords.map(record => {
-			console.log('record',record)
-			console.log('record.Item',record.Item)
-
-			// If record.Id is set, return the record as is
-			if (record.Id) {
-				return record;
+		// Loop through each tag and find matching headlines
+		initTags.forEach(tag => {
+			const tagHeadlines = allHeadlines.filter(headline => 
+				headline.title.includes(tag.fieldData.HeadlineName)
+			);
+	
+			// Only add the tag if there are matching headlines
+			if (tagHeadlines.length > 0) {
+				transformedData[tag.fieldData.HeadlineName] = tagHeadlines;
+	
+				// Remove these headlines from the allHeadlines array
+				allHeadlines = allHeadlines.filter(headline => 
+					!tagHeadlines.includes(headline)
+				);
 			}
-
-			// Find the matching item in itemData.Item for each record
-			const matchingItem = itemData.Item.find(item => item.Name === record.Item);
-			console.log('matchingItem',matchingItem)
+		});
 	
-			// If no matching item is found, log an error and return null (to be filtered out later)
-			if (!matchingItem) {
-				console.error("Matching item not found for", record.Item);
-				return null;
-			}
+		// Now add "Everything Else" with the remaining headlines
+		transformedData["News Headlines"] = allHeadlines;
 	
-			// Transform the record
-			return {
-				Id: matchingItem.Id,
-				Name: record.Item,
-				Rate: record.Rate,
-				Qty: record.Qty,
-				Total: (parseFloat(record.Rate) * parseFloat(record.Qty)).toFixed(2),
-				Note: record.Note,
-			};
-		}).filter(record => record !== null); // Filter out any null values if a matching item was not found
+		return transformedData;
 	};
 	
+	/*
 	const [records, setRecords] = useState(transformedRecords());
 	// Ref to hold the current state
 	const currentState = useRef({ itemData, records });
@@ -74,10 +73,11 @@ const MyApp = ({initData,initRecords}) => {
 		}).filter(item => item !== null); // Filter out null values
 		return result;
 	};
+	*/
 
 	return (
 		<>
-		<MyTable setRecords={setRecords} records={records} items={items()} />
+		<Table data={transformedRecords()} />
 		</>
 	);
 };

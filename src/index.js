@@ -4,11 +4,13 @@ import { createRoot } from "react-dom/client";
 
 let root; // Store the root outside the function
 window.loadTable = (data) => {
-    console.log('version', 1.04);
+    console.log('version', 1.002);
     const json = JSON.parse(data);
     console.log('initData', json);
-    const records = Array.isArray(json.record) ? json.record : (json.record ? [json.record] : []);
-    console.log('initRecord', records);
+    const headlines = Array.isArray(json.headlines) ? json.headlines : (json.headlines ? [json.headlines] : []);
+    console.log('initHeadlines', headlines);
+    const tags = Array.isArray(json.headlineTags) ? json.headlineTags : (json.headlineTags ? [json.headlineTags] : []);
+    console.log('initTags', tags);
 
     // Unmount existing React component if any
     if (root) {
@@ -24,7 +26,7 @@ window.loadTable = (data) => {
             if (!root) {
                 root = createRoot(container);
             }
-            root.render(<MyApp initData={json.QueryResponse} initRecords={records} />);
+            root.render(<MyApp initTags={tags} initHeadlines={headlines} />);
         } else {
             console.error("Element with id 'root' not found during mount");
         }

@@ -1,6 +1,6 @@
 
 module.exports = {
-  widgetName: "uiSimpleTable",
+  widgetName: "basicTable",
   server: "$",
   file: "jsDev",
   uploadScript: "UploadToHTML",
